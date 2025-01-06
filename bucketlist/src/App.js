@@ -1,12 +1,14 @@
-import logo from './logo.svg';
 import './App.css';
-import { InputComponent } from './InputComponent';
+import { TestPage } from './TestPage';
 
 
 function App() {
+
+
+
   return (
     <div className="App">
-      <InputComponent label="New Category"/>
+     <TestPage/>
     </div>
   );
 }
