@@ -1,9 +1,11 @@
 import { Avatar, Card, Input, Checkbox, Button } from "antd";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
+import AddCategoryModal from "./AddCategoryModal"; // Import the modal component
 
 export const ListView = ({ data }) => {
   const [categories, setCategories] = useState(data);
+  const [isModalVisible, setIsModalVisible] = useState(false); // State for modal visibility
 
   // Handle checkbox change
   const handleCheckboxChange = (categoryId, itemId, isCompleted) => {
@@ -47,7 +49,7 @@ export const ListView = ({ data }) => {
       prevCategories.map((category) => {
         if (category.id === categoryId) {
           const newItem = {
-            id: `${Date.now()}`, // Use a unique ID
+            id: `${Date.now()}`,
             description: null,
             isCompleted: false,
           };
@@ -74,6 +76,16 @@ export const ListView = ({ data }) => {
         return category;
       })
     );
+  };
+
+  // Add a new category
+  const addNewCategory = (categoryName) => {
+    const newCategory = {
+      id: `${Date.now()}`,
+      categoryName: categoryName,
+      todoList: [],
+    };
+    setCategories((prevCategories) => [...prevCategories, newCategory]);
   };
 
   const contentBuilder = (category) => {
@@ -202,6 +214,23 @@ export const ListView = ({ data }) => {
           </Card>
         );
       })}
+
+      {/* Add Category Button */}
+      <Button
+        icon={<PlusCircleOutlined />}
+        type="primary"
+        onClick={() => setIsModalVisible(true)}
+        style={{ marginTop: "16px", display: "block", width: "100%" }}
+      >
+        Add New Category
+      </Button>
+
+      {/* Modal for adding new category */}
+      <AddCategoryModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onAddCategory={addNewCategory}
+      />
     </div>
   );
 };
