@@ -1,4 +1,5 @@
-import { Avatar, Card, Input, Checkbox } from "antd";
+import { Avatar, Card, Input, Checkbox, Button } from "antd";
+import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 
 export const ListView = ({ data }) => {
@@ -40,17 +41,67 @@ export const ListView = ({ data }) => {
     );
   };
 
+  // Add a new uncompleted item
+  const addNewUncompletedItem = (categoryId) => {
+    setCategories((prevCategories) =>
+      prevCategories.map((category) => {
+        if (category.id === categoryId) {
+          const newItem = {
+            id: `${Date.now()}`, // Use a unique ID
+            description: null,
+            isCompleted: false,
+          };
+          return {
+            ...category,
+            todoList: [...category.todoList, newItem],
+          };
+        }
+        return category;
+      })
+    );
+  };
+
+  // Remove an uncompleted item
+  const removeUncompletedItem = (categoryId, itemId) => {
+    setCategories((prevCategories) =>
+      prevCategories.map((category) => {
+        if (category.id === categoryId) {
+          return {
+            ...category,
+            todoList: category.todoList.filter((item) => item.id !== itemId),
+          };
+        }
+        return category;
+      })
+    );
+  };
+
   const contentBuilder = (category) => {
     const completedItems = category.todoList.filter((item) => item.isCompleted);
     const uncompletedItems = category.todoList.filter((item) => !item.isCompleted);
 
     return (
       <>
+        {/* Add button for uncompleted items */}
+        {uncompletedItems.length === 0 && completedItems.length === 0 && (
+          <Button
+            icon={<PlusCircleOutlined />}
+            type="dashed"
+            onClick={() => addNewUncompletedItem(category.id)}
+            style={{ marginBottom: "16px" }}
+          >
+            Add New Item
+          </Button>
+        )}
+
         {uncompletedItems.length > 0 && (
           <div>
             <h3>Uncompleted</h3>
-            {uncompletedItems.map((item) => (
-              <div key={item.id} style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+            {uncompletedItems.map((item, index) => (
+              <div
+                key={item.id}
+                style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
+              >
                 <Checkbox
                   checked={item.isCompleted}
                   onChange={() =>
@@ -59,20 +110,43 @@ export const ListView = ({ data }) => {
                 />
                 <Input
                   value={item.description}
+                  placeholder="New Item"
                   onChange={(e) =>
                     handleInputChange(category.id, item.id, e.target.value)
                   }
                   style={{ marginLeft: "8px", flex: 1 }}
                 />
+                <MinusCircleOutlined
+                  style={{ marginLeft: "8px", color: "red", cursor: "pointer" }}
+                  onClick={() => removeUncompletedItem(category.id, item.id)}
+                />
+                {index === uncompletedItems.length - 1 && (
+                  <PlusCircleOutlined
+                    style={{ marginLeft: "8px", color: "#1890ff", cursor: "pointer" }}
+                    onClick={() => addNewUncompletedItem(category.id)}
+                  />
+                )}
               </div>
             ))}
           </div>
         )}
+
         {completedItems.length > 0 && (
           <div style={{ marginTop: "16px" }}>
+            <Button
+              icon={<PlusCircleOutlined />}
+              type="dashed"
+              onClick={() => addNewUncompletedItem(category.id)}
+              style={{ marginBottom: "16px" }}
+            >
+              Add New Item
+            </Button>
             <h3>Completed</h3>
             {completedItems.map((item) => (
-              <div key={item.id} style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+              <div
+                key={item.id}
+                style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
+              >
                 <Checkbox
                   checked={item.isCompleted}
                   onChange={() =>
@@ -87,9 +161,6 @@ export const ListView = ({ data }) => {
               </div>
             ))}
           </div>
-        )}
-        {uncompletedItems.length === 0 && completedItems.length === 0 && (
-          <p>No items available</p>
         )}
       </>
     );
