@@ -97,6 +97,7 @@ export const ListView = ({ data }) => {
         {/* Add button for uncompleted items */}
         {uncompletedItems.length === 0 && completedItems.length === 0 && (
           <Button
+          className="schoolbell-regular"
             icon={<PlusCircleOutlined />}
             type="dashed"
             onClick={() => addNewUncompletedItem(category.id)}
@@ -121,6 +122,7 @@ export const ListView = ({ data }) => {
                   }
                 />
                 <Input
+                className="delius-regular"
                   value={item.description}
                   placeholder="New Item"
                   onChange={(e) =>
@@ -146,6 +148,7 @@ export const ListView = ({ data }) => {
         {completedItems.length > 0 && (
           <div style={{ marginTop: "16px" }}>
             <Button
+            className="schoolbell-regular"
               icon={<PlusCircleOutlined />}
               type="dashed"
               onClick={() => addNewUncompletedItem(category.id)}
@@ -166,6 +169,7 @@ export const ListView = ({ data }) => {
                   }
                 />
                 <Input
+                className="delius-regular"
                   value={item.description}
                   disabled
                   style={{ marginLeft: "8px", flex: 1 }}
@@ -205,10 +209,14 @@ export const ListView = ({ data }) => {
               {`${completedItems}/${totalItems}`}
             </div>
             <Card.Meta
-              avatar={
+            /*   avatar={
                 <Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${category.id}`} />
-              }
-              title={category.categoryName}
+              } */
+                title={
+                  <span className="mystery-quest-regular">
+                    {category.categoryName}
+                  </span>
+                }
               description={contentBuilder(category)}
             />
           </Card>
@@ -217,6 +225,7 @@ export const ListView = ({ data }) => {
 
       {/* Add Category Button */}
       <Button
+      className="schoolbell-regular"
         icon={<PlusCircleOutlined />}
         type="primary"
         onClick={() => setIsModalVisible(true)}

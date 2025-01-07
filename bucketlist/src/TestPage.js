@@ -34,14 +34,8 @@ export const TestPage = () => {
   }]
 
 
-
-  const CategoryChange = (e) => {
-    setTextValue(e);
-    console.log(e);
-  };
-
   return (
-    <div>
+    <div className="listview">
       {/* <InputComponent label="New Category" TextValue={textValue} CategoryChange={CategoryChange} /> */}
 
       <ListView data={data}/>
