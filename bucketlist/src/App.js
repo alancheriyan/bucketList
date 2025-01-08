@@ -1,5 +1,7 @@
 import './App.css';
 import { TestPage } from './TestPage';
+import { MainPage } from './MainPage';
+
 import {ConfigProvider} from "antd"
 
 function App() {
@@ -19,7 +21,7 @@ function App() {
     }}
   >
     <div className="App">
-     <TestPage/>
+     <MainPage/>
     </div>
 
     </ConfigProvider>

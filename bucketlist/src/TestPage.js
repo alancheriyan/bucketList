@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { InputComponent } from "./InputComponent";
+import React from "react";
 import { ListView } from "./ListView";
 
 export const TestPage = () => {
-  const [textValue, setTextValue] = useState("");
+
 
   const data=[{
     id:"1",
@@ -31,7 +30,8 @@ export const TestPage = () => {
     categoryName: "Place to visit",
     todoList:[
   ]
-  }]
+  }];
+
 
 
   return (

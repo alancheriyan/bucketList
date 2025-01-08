@@ -1,14 +1,16 @@
-import { Avatar, Card, Input, Checkbox, Button } from "antd";
+import { Card, Input, Checkbox, Button } from "antd";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
-import AddCategoryModal from "./AddCategoryModal"; // Import the modal component
+import AddCategoryModal from "./AddCategoryModal";
+import { collection, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { db } from "./firebase"; // Firebase setup file
 
 export const ListView = ({ data }) => {
   const [categories, setCategories] = useState(data);
-  const [isModalVisible, setIsModalVisible] = useState(false); // State for modal visibility
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   // Handle checkbox change
-  const handleCheckboxChange = (categoryId, itemId, isCompleted) => {
+  const handleCheckboxChange = async (categoryId, itemId, isCompleted) => {
     setCategories((prevCategories) =>
       prevCategories.map((category) => {
         if (category.id === categoryId) {
@@ -24,10 +26,17 @@ export const ListView = ({ data }) => {
         return category;
       })
     );
+
+    // Update Firebase
+    try {
+      await updateDoc(doc(db, "tblTodoList", itemId), { isCompleted: !isCompleted });
+    } catch (error) {
+      console.error("Error updating todo item:", error);
+    }
   };
 
   // Handle input change for uncompleted items
-  const handleInputChange = (categoryId, itemId, newValue) => {
+  const handleInputChange = async (categoryId, itemId, newValue) => {
     setCategories((prevCategories) =>
       prevCategories.map((category) => {
         if (category.id === categoryId) {
@@ -41,18 +50,26 @@ export const ListView = ({ data }) => {
         return category;
       })
     );
+
+    // Update Firebase
+    try {
+      await updateDoc(doc(db, "tblTodoList", itemId), { description: newValue });
+    } catch (error) {
+      console.error("Error updating todo item:", error);
+    }
   };
 
   // Add a new uncompleted item
-  const addNewUncompletedItem = (categoryId) => {
+  const addNewUncompletedItem = async (categoryId) => {
+    const newItem = {
+      id: `${Date.now()}`,
+      description: null,
+      isCompleted: false,
+    };
+
     setCategories((prevCategories) =>
       prevCategories.map((category) => {
         if (category.id === categoryId) {
-          const newItem = {
-            id: `${Date.now()}`,
-            description: null,
-            isCompleted: false,
-          };
           return {
             ...category,
             todoList: [...category.todoList, newItem],
@@ -61,10 +78,21 @@ export const ListView = ({ data }) => {
         return category;
       })
     );
+
+    // Add to Firebase
+    try {
+      await addDoc(collection(db, "tblTodoList"), {
+        categoryId,
+        description: newItem.description,
+        isCompleted: newItem.isCompleted,
+      });
+    } catch (error) {
+      console.error("Error adding todo item:", error);
+    }
   };
 
   // Remove an uncompleted item
-  const removeUncompletedItem = (categoryId, itemId) => {
+  const removeUncompletedItem = async (categoryId, itemId) => {
     setCategories((prevCategories) =>
       prevCategories.map((category) => {
         if (category.id === categoryId) {
@@ -76,16 +104,31 @@ export const ListView = ({ data }) => {
         return category;
       })
     );
+
+    // Delete from Firebase
+    try {
+      await deleteDoc(doc(db, "tblTodoList", itemId));
+    } catch (error) {
+      console.error("Error deleting todo item:", error);
+    }
   };
 
   // Add a new category
-  const addNewCategory = (categoryName) => {
+  const addNewCategory = async (categoryName) => {
     const newCategory = {
       id: `${Date.now()}`,
-      categoryName: categoryName,
+      categoryName,
       todoList: [],
     };
+
     setCategories((prevCategories) => [...prevCategories, newCategory]);
+
+    // Add to Firebase
+    try {
+      await addDoc(collection(db, "tblCategory"), { categoryName });
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
   };
 
   const contentBuilder = (category) => {
@@ -94,10 +137,9 @@ export const ListView = ({ data }) => {
 
     return (
       <>
-        {/* Add button for uncompleted items */}
         {uncompletedItems.length === 0 && completedItems.length === 0 && (
           <Button
-          className="schoolbell-regular"
+            className="schoolbell-regular"
             icon={<PlusCircleOutlined />}
             type="dashed"
             onClick={() => addNewUncompletedItem(category.id)}
@@ -122,7 +164,7 @@ export const ListView = ({ data }) => {
                   }
                 />
                 <Input
-                className="delius-regular"
+                  className="delius-regular"
                   value={item.description}
                   placeholder="New Item"
                   onChange={(e) =>
@@ -147,15 +189,6 @@ export const ListView = ({ data }) => {
 
         {completedItems.length > 0 && (
           <div style={{ marginTop: "16px" }}>
-            <Button
-            className="schoolbell-regular"
-              icon={<PlusCircleOutlined />}
-              type="dashed"
-              onClick={() => addNewUncompletedItem(category.id)}
-              style={{ marginBottom: "16px" }}
-            >
-              Add New Item
-            </Button>
             <h3>Completed</h3>
             {completedItems.map((item) => (
               <div
@@ -169,7 +202,7 @@ export const ListView = ({ data }) => {
                   }
                 />
                 <Input
-                className="delius-regular"
+                  className="delius-regular"
                   value={item.description}
                   disabled
                   style={{ marginLeft: "8px", flex: 1 }}
@@ -193,7 +226,6 @@ export const ListView = ({ data }) => {
             key={category.id}
             style={{ marginBottom: "16px", position: "relative" }}
           >
-            {/* Status in the top-right corner */}
             <div
               style={{
                 position: "absolute",
@@ -209,23 +241,19 @@ export const ListView = ({ data }) => {
               {`${completedItems}/${totalItems}`}
             </div>
             <Card.Meta
-            /*   avatar={
-                <Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${category.id}`} />
-              } */
-                title={
-                  <span className="mystery-quest-regular">
-                    {category.categoryName}
-                  </span>
-                }
+              title={
+                <span className="mystery-quest-regular">
+                  {category.categoryName}
+                </span>
+              }
               description={contentBuilder(category)}
             />
           </Card>
         );
       })}
 
-      {/* Add Category Button */}
       <Button
-      className="schoolbell-regular"
+        className="schoolbell-regular"
         icon={<PlusCircleOutlined />}
         type="primary"
         onClick={() => setIsModalVisible(true)}
@@ -234,7 +262,6 @@ export const ListView = ({ data }) => {
         Add New Category
       </Button>
 
-      {/* Modal for adding new category */}
       <AddCategoryModal
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
