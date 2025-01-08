@@ -1,13 +1,28 @@
-import logo from './logo.svg';
 import './App.css';
-import { InputComponent } from './InputComponent';
-
+import { TestPage } from './TestPage';
+import {ConfigProvider} from "antd"
 
 function App() {
+
+
+
   return (
+    <ConfigProvider
+    theme={{
+      token: {
+        // Seed Token
+        colorPrimary: '#65aa6b',
+        borderRadius: 2,
+
+
+      },
+    }}
+  >
     <div className="App">
-      <InputComponent label="New Category"/>
+     <TestPage/>
     </div>
+
+    </ConfigProvider>
   );
 }
 
