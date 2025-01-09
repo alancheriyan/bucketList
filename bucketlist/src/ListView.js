@@ -2,7 +2,7 @@ import { Card, Input, Checkbox, Button } from "antd";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import AddCategoryModal from "./AddCategoryModal";
-import { collection, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, deleteDoc,Timestamp  } from "firebase/firestore";
 import { db } from "./firebase"; // Firebase setup file
 
 export const ListView = ({ data }) => {
@@ -61,36 +61,38 @@ export const ListView = ({ data }) => {
 
   // Add a new uncompleted item
   const addNewUncompletedItem = async (categoryId) => {
-    const newItem = {
-      id: `${Date.now()}`,
-      description: null,
-      isCompleted: false,
-    };
-
-    setCategories((prevCategories) =>
-      prevCategories.map((category) => {
-        if (category.id === categoryId) {
-          return {
-            ...category,
-            todoList: [...category.todoList, newItem],
-          };
-        }
-        return category;
-      })
-    );
-
-    // Add to Firebase
     try {
-      await addDoc(collection(db, "tblTodoList"), {
+      // Add to Firebase and get the document reference
+      const docRef = await addDoc(collection(db, "tblTodoList"), {
         categoryId,
-        description: newItem.description,
-        isCompleted: newItem.isCompleted,
+        description: null,
+        isCompleted: false,
+        createdAt: Timestamp.now()
       });
+  
+      const newItem = {
+        id: docRef.id, // Use Firebase-generated ID
+        description: null,
+        isCompleted: false,
+      };
+  
+      // Update local state
+      setCategories((prevCategories) =>
+        prevCategories.map((category) => {
+          if (category.id === categoryId) {
+            return {
+              ...category,
+              todoList: [...category.todoList, newItem],
+            };
+          }
+          return category;
+        })
+      );
     } catch (error) {
       console.error("Error adding todo item:", error);
     }
   };
-
+  
   // Remove an uncompleted item
   const removeUncompletedItem = async (categoryId, itemId) => {
     setCategories((prevCategories) =>
@@ -115,21 +117,26 @@ export const ListView = ({ data }) => {
 
   // Add a new category
   const addNewCategory = async (categoryName) => {
-    const newCategory = {
-      id: `${Date.now()}`,
-      categoryName,
-      todoList: [],
-    };
-
-    setCategories((prevCategories) => [...prevCategories, newCategory]);
-
-    // Add to Firebase
     try {
-      await addDoc(collection(db, "tblCategory"), { categoryName });
+      // Add to Firebase and get the document reference
+      const docRef = await addDoc(collection(db, "tblCategory"), {
+        categoryName,
+        createdAt: Timestamp.now(), // Optionally include a timestamp
+      });
+  
+      const newCategory = {
+        id: docRef.id, // Use Firebase-generated ID
+        categoryName,
+        todoList: [],
+      };
+  
+      // Update local state
+      setCategories((prevCategories) => [...prevCategories, newCategory]);
     } catch (error) {
       console.error("Error adding category:", error);
     }
   };
+  
 
   const contentBuilder = (category) => {
     const completedItems = category.todoList.filter((item) => item.isCompleted);
