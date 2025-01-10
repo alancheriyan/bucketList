@@ -3,6 +3,7 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "./firebase"; // Import your Firebase setup
 import { ListView } from "./ListView";
 import { Spin } from "antd"; // Import the Ant Design Spinner
+import { dbSetting } from "./dbSetting";
 
 export const MainPage = () => {
   const [data, setData] = useState([]);
@@ -13,7 +14,7 @@ export const MainPage = () => {
       try {
         // Fetch categories, ordered by CreatedAt
         const categoryQuery = query(
-          collection(db, "tblCategory"),
+          collection(db, dbSetting.CategoryTable),
           orderBy("createdAt", "asc") // Order categories by CreatedAt (ascending)
         );
         const categorySnapshot = await getDocs(categoryQuery);
@@ -24,7 +25,7 @@ export const MainPage = () => {
 
         // Fetch todo list items, ordered by CreatedAt
         const todoQuery = query(
-          collection(db, "tblTodoList"),
+          collection(db, dbSetting.TodoListTable),
           orderBy("createdAt", "asc") // Order todos by CreatedAt (ascending)
         );
         const todoSnapshot = await getDocs(todoQuery);
@@ -45,7 +46,7 @@ export const MainPage = () => {
               isCompleted,
             })),
         }));
-console.log(formattedData)
+
         setData(formattedData);
       } catch (error) {
         console.error("Error fetching data:", error);

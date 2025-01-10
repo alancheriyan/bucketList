@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import AddCategoryModal from "./AddCategoryModal";
 import { collection, addDoc, doc, updateDoc, deleteDoc,Timestamp  } from "firebase/firestore";
 import { db } from "./firebase"; // Firebase setup file
+import { dbSetting } from "./dbSetting";
 
 export const ListView = ({ data }) => {
   const [categories, setCategories] = useState(data);
@@ -29,7 +30,7 @@ export const ListView = ({ data }) => {
 
     // Update Firebase
     try {
-      await updateDoc(doc(db, "tblTodoList", itemId), { isCompleted: !isCompleted });
+      await updateDoc(doc(db, dbSetting.TodoListTable, itemId), { isCompleted: !isCompleted });
     } catch (error) {
       console.error("Error updating todo item:", error);
     }
@@ -53,7 +54,7 @@ export const ListView = ({ data }) => {
 
     // Update Firebase
     try {
-      await updateDoc(doc(db, "tblTodoList", itemId), { description: newValue });
+      await updateDoc(doc(db, dbSetting.TodoListTable, itemId), { description: newValue });
     } catch (error) {
       console.error("Error updating todo item:", error);
     }
@@ -63,7 +64,7 @@ export const ListView = ({ data }) => {
   const addNewUncompletedItem = async (categoryId) => {
     try {
       // Add to Firebase and get the document reference
-      const docRef = await addDoc(collection(db, "tblTodoList"), {
+      const docRef = await addDoc(collection(db, dbSetting.TodoListTable), {
         categoryId,
         description: null,
         isCompleted: false,
@@ -109,7 +110,7 @@ export const ListView = ({ data }) => {
 
     // Delete from Firebase
     try {
-      await deleteDoc(doc(db, "tblTodoList", itemId));
+      await deleteDoc(doc(db, dbSetting.TodoListTable, itemId));
     } catch (error) {
       console.error("Error deleting todo item:", error);
     }
@@ -119,7 +120,7 @@ export const ListView = ({ data }) => {
   const addNewCategory = async (categoryName) => {
     try {
       // Add to Firebase and get the document reference
-      const docRef = await addDoc(collection(db, "tblCategory"), {
+      const docRef = await addDoc(collection(db, dbSetting.CategoryTable), {
         categoryName,
         createdAt: Timestamp.now(), // Optionally include a timestamp
       });
