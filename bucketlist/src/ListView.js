@@ -1,4 +1,4 @@
-import { Card, Input, Checkbox, Button } from "antd";
+import { Card, Input, Checkbox, Button,Collapse } from "antd";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import AddCategoryModal from "./AddCategoryModal";
@@ -225,56 +225,57 @@ export const ListView = ({ data }) => {
 
   return (
     <div>
+
+   
+    <Collapse>
       {categories.map((category) => {
         const totalItems = category.todoList.length;
         const completedItems = category.todoList.filter((item) => item.isCompleted).length;
-
+  
         return (
-          <Card
+          <Collapse.Panel
             key={category.id}
-            style={{ marginBottom: "16px", position: "relative" }}
+            header={
+              <span className="mystery-quest-regular">
+                {category.categoryName}
+              </span>
+            }
+            extra={
+              <div
+                style={{
+                  background: "#f0f0f0",
+                  padding: "4px 8px",
+                  borderRadius: "12px",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                }}
+              >
+                {`${completedItems}/${totalItems}`}
+              </div>
+            }
           >
-            <div
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "10px",
-                background: "#f0f0f0",
-                padding: "4px 8px",
-                borderRadius: "12px",
-                fontSize: "12px",
-                fontWeight: "bold",
-              }}
-            >
-              {`${completedItems}/${totalItems}`}
-            </div>
-            <Card.Meta
-              title={
-                <span className="mystery-quest-regular">
-                  {category.categoryName}
-                </span>
-              }
-              description={contentBuilder(category)}
-            />
-          </Card>
+            {contentBuilder(category)}
+          </Collapse.Panel>
         );
       })}
-
-      <Button
-        className="schoolbell-regular"
-        icon={<PlusCircleOutlined />}
-        type="primary"
-        onClick={() => setIsModalVisible(true)}
-        style={{ marginTop: "16px", display: "block", width: "100%" }}
-      >
-        Add New Category
-      </Button>
-
-      <AddCategoryModal
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        onAddCategory={addNewCategory}
-      />
-    </div>
+    </Collapse>
+  
+    <Button
+      className="schoolbell-regular"
+      icon={<PlusCircleOutlined />}
+      type="primary"
+      onClick={() => setIsModalVisible(true)}
+      style={{ marginTop: "16px", display: "block", width: "100%" }}
+    >
+      Add New Category
+    </Button>
+  
+    <AddCategoryModal
+      visible={isModalVisible}
+      onClose={() => setIsModalVisible(false)}
+      onAddCategory={addNewCategory}
+    />
+     </div>
   );
+  
 };
